@@ -103,26 +103,6 @@ portfolio-gallery/
         └── studio-portrait.jpg        # Nocturne Profile (Paris)
 ```
 
----
-
-## How to View Locally
-
-Because this project uses 100% plain HTML5 and CSS3 with no external dependencies or build tools:
-
-1. **Direct File Open**:
-   Double click `index.html` or open it directly in any modern browser (Chrome, Firefox, Safari, Edge).
-
-2. **Local HTTP Server** (Recommended for web standards):
-   Run any static web server in the project directory:
-   ```bash
-   npx serve .
-   # or
-   python -m http.server 8000
-   ```
-   Then navigate to `http://localhost:8000`.
-
----
-
 ## License & Credits
 - **Photographic Works**: Curated editorial demonstrations for AURA Studio.
 - **Design & Code**: Plain HTML5/CSS3 implementation adhering to modern W3C semantics.
