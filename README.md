@@ -2,7 +2,7 @@
 
 A responsive single-page photography and art portfolio built strictly with **pure HTML5 and CSS3** (zero frameworks, zero JavaScript).
 
-Designed around an editorial aesthetic for visual artist **Elena Vance**, featuring an image gallery grid as the centerpiece with proper `object-fit: cover` treatments, semantic landmarks, working navigation, global `box-sizing: border-box`, custom CSS color variables, and an interactive "Book a Shoot" reservation experience.
+Designed around an editorial aesthetic for visual artist **Kotbi Mohammed**, featuring an image gallery grid as the centerpiece with proper `object-fit: cover` treatments, semantic landmarks, working navigation, global `box-sizing: border-box`, custom CSS color variables, and an interactive "Book a Shoot" reservation experience.
 
 ---
 
