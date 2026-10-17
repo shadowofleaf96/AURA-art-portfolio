@@ -24,7 +24,7 @@ export default function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           {/* Portrait Column */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center">
-            <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden shadow-warm-lg border-4 border-white ring-1 ring-black/10">
+            <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden shadow-warm-lg">
               <img
                 src="/assets/images/profile-pic2.webp"
                 alt="Mohammed Kotbi, photographer and visual artist"

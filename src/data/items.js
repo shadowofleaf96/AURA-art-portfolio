@@ -119,22 +119,6 @@ export const GALLERY_ITEMS = [
     price: 390,
     edition: "Museum Rag Print",
   },
-  {
-    id: "neon-shadows",
-    title: "Neon Shadows",
-    category: "Street Noir",
-    filterCategory: "Editorial & Fashion",
-    location: "Shinjuku, Tokyo",
-    camera: "Leica Q3 • 28mm f/1.7",
-    image: "/assets/images/street-noir.jpg",
-    alt: "Cinematic street photography scene at dusk with ambient glow reflecting off wet asphalt",
-    featured: "standard",
-    description:
-      "Midnight rain in Shinjuku alleys. Reflections on asphalt bleed vibrant magenta and cyan streaks through deep noir darkness, capturing quiet urban solitude.",
-    specs: ["Leica Q3", "28mm f/1.7 Summilux", "1/80s", "ISO 1600"],
-    price: 360,
-    edition: "Hahnemühle Photo Rag",
-  },
 ];
 
 export const SERVICES = [
