@@ -24,14 +24,14 @@ export default function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           {/* Portrait Column */}
           <div className="lg:col-span-5 flex flex-col items-center">
-            <div className="relative w-full max-w-md rounded-card overflow-hidden shadow-warm-lg border border-black/10">
+            <div className="relative w-full max-w-md rounded-3xl sm:rounded-[36px] overflow-hidden shadow-warm-lg border border-black/10 bg-aura-card">
               <img
                 src="/assets/images/profile-pic2.webp"
                 alt="Mohammed Kotbi, photographer and visual artist holding medium format camera"
-                className="w-full h-auto object-cover aspect-[4/5]"
+                className="w-full h-auto object-cover aspect-[4/5] rounded-3xl sm:rounded-[36px]"
                 loading="lazy"
               />
-              <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
+              <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white">
                 <p className="text-xs sm:text-sm font-medium tracking-wide">
                   Mohammed Kotbi &bull; Studio Director
                 </p>
