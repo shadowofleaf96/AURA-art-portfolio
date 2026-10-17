@@ -23,19 +23,19 @@ export default function AboutSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
           {/* Portrait Column */}
-          <div className="lg:col-span-5 flex flex-col items-center">
-            <div className="relative w-full max-w-md rounded-3xl sm:rounded-[36px] overflow-hidden shadow-warm-lg border border-black/10 bg-aura-card">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center">
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden shadow-warm-lg border-4 border-white ring-1 ring-black/10">
               <img
                 src="/assets/images/profile-pic2.webp"
-                alt="Mohammed Kotbi, photographer and visual artist holding medium format camera"
-                className="w-full h-auto object-cover aspect-[4/5] rounded-3xl sm:rounded-[36px]"
+                alt="Mohammed Kotbi, photographer and visual artist"
+                className="w-full h-full object-cover rounded-full"
                 loading="lazy"
               />
-              <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white">
-                <p className="text-xs sm:text-sm font-medium tracking-wide">
-                  Mohammed Kotbi &bull; Studio Director
-                </p>
-              </div>
+            </div>
+            <div className="mt-5 px-4 py-1.5 rounded-full bg-white border border-black/5 shadow-warm-sm text-center">
+              <p className="text-xs sm:text-sm font-medium tracking-wide text-aura-primary">
+                Mohammed Kotbi &bull; <span className="text-aura-accent font-semibold">Studio Director</span>
+              </p>
             </div>
           </div>
 
