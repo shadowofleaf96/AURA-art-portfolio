@@ -14,3 +14,16 @@ dist/
 dist-ssr/
 *.local
 .vite/
+
+# Environment variables and secrets
+.env
+.env.local
+server/.env
+client/.env
+client/.env.local
+!.env.example
+!*.env.example
+!server/.env.example
+!client/.env.example
+
+

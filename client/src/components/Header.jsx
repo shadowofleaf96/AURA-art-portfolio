@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout, openAuthModal } = useAuth();
 
   const navLinks = [
     { name: 'Gallery', href: '#gallery' },
@@ -44,12 +46,42 @@ export default function Header() {
                 </li>
               ))}
             </ul>
-            <a
-              href="#book"
-              className="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-medium text-white bg-aura-primary hover:bg-aura-accent transition-colors duration-200 shadow-warm-sm hover:shadow-warm-md"
-            >
-              Book a Shoot
-            </a>
+
+            {/* Authentication Buttons (Signed in vs Signed out) */}
+            <div className="flex items-center gap-3 pl-4 border-l border-black/10">
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/5 border border-black/5 text-xs font-medium text-aura-primary">
+                    <span className="w-6 h-6 rounded-full bg-aura-accent text-white flex items-center justify-center font-bold text-[10px] uppercase">
+                      {user.name ? user.name[0] : 'U'}
+                    </span>
+                    <span className="truncate max-w-[130px] font-semibold">{user.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full text-aura-secondary hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => openAuthModal('signin')}
+                  className="text-sm font-semibold text-aura-primary hover:text-aura-accent px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-aura-accent/40 rounded-lg"
+                >
+                  Sign In
+                </button>
+              )}
+
+              <a
+                href="#book"
+                className="inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-medium text-white bg-aura-primary hover:bg-aura-accent transition-colors duration-200 shadow-warm-sm hover:shadow-warm-md"
+              >
+                Book a Shoot
+              </a>
+            </div>
           </nav>
 
           {/* Mobile Hamburger Toggle Button */}
@@ -95,7 +127,43 @@ export default function Header() {
                 {link.name}
               </a>
             ))}
-            <div className="pt-2">
+
+            {/* Mobile Auth Status */}
+            <div className="pt-3 border-t border-black/5 space-y-2">
+              {isAuthenticated ? (
+                <div className="p-3 bg-black/5 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-aura-accent text-white flex items-center justify-center font-bold text-xs uppercase">
+                      {user.name ? user.name[0] : 'U'}
+                    </span>
+                    <span className="text-sm font-semibold text-aura-primary truncate max-w-[150px]">
+                      {user.name}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    openAuthModal('signin');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-center px-4 py-2.5 rounded-full text-sm font-semibold text-aura-primary bg-black/5 hover:bg-black/10 transition-colors"
+                >
+                  Sign In / Register
+                </button>
+              )}
+
               <a
                 href="#book"
                 onClick={() => setMobileMenuOpen(false)}

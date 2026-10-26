@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
-export default function BookingSection() {
+export default function BookingSection({ printOrders = {}, items = [] }) {
+  const { user, token } = useAuth();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,7 +18,20 @@ export default function BookingSection() {
     consent: false,
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+
+  // Auto-fill form if user is authenticated
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        email: prev.email || user.email || '',
+      }));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -24,19 +41,53 @@ export default function BookingSection() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  // Compile selected print orders
+  const orderedPrintsList = Object.entries(printOrders)
+    .filter(([_, qty]) => qty > 0)
+    .map(([itemId, qty]) => {
+      const item = items.find((i) => i.id === itemId);
+      return {
+        id: itemId,
+        title: item ? item.title : itemId,
+        quantity: qty,
+        price: item ? item.price : 0,
+      };
+    });
+
+  const printsTotal = orderedPrintsList.reduce((sum, item) => sum + item.quantity * item.price, 0);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.vision || !formData.consent) {
       return;
     }
-    // Simulation of form processing (pure React, no backend needed for Week 2)
-    setIsSubmitted(true);
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const orderData = {
+        customerName: formData.name,
+        customerEmail: formData.email,
+        items: orderedPrintsList,
+        totalPrice: printsTotal,
+        notes: `Shoot Type: ${formData.shootType} | Phone: ${formData.phone || 'N/A'} | Company: ${formData.company || 'N/A'} | Date: ${formData.date || 'Flexible'} | Location: ${formData.location || 'N/A'} | Budget: ${formData.budget || 'N/A'} | Vision: ${formData.vision}`,
+      };
+
+      await api.submitOrder(orderData, token);
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Failed to submit booking inquiry to API:', err);
+      setSubmitError(err.message || 'Could not record inquiry. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
     setFormData({
-      name: '',
-      email: '',
+      name: user ? user.name : '',
+      email: user ? user.email : '',
       phone: '',
       company: '',
       shootType: 'editorial',
@@ -47,6 +98,7 @@ export default function BookingSection() {
       consent: false,
     });
     setIsSubmitted(false);
+    setSubmitError(null);
   };
 
   const benefits = [
@@ -338,20 +390,61 @@ export default function BookingSection() {
                     </label>
                   </div>
 
+                  {/* Selected Prints Summary Notice in Form */}
+                  {orderedPrintsList.length > 0 && (
+                    <div className="p-3.5 rounded-xl bg-aura-accent/10 border border-aura-accent/20 text-xs">
+                      <p className="font-semibold text-aura-primary">
+                        Attaching {orderedPrintsList.length} print order selection(s) to this inquiry:
+                      </p>
+                      <ul className="mt-1.5 space-y-1 text-aura-secondary">
+                        {orderedPrintsList.map((print) => (
+                          <li key={print.id} className="flex justify-between">
+                            <span>• {print.title} &times; {print.quantity}</span>
+                            <span className="font-medium text-aura-primary">&euro;{print.price * print.quantity}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-2 pt-2 border-t border-aura-accent/20 flex justify-between font-bold text-aura-primary">
+                        <span>Total Prints Cost:</span>
+                        <span>&euro;{printsTotal}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Submission Error Notification */}
+                  {submitError && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm">
+                      <span className="font-semibold">Error:</span> {submitError}
+                    </div>
+                  )}
+
                   {/* Submit Button */}
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full text-base font-semibold text-white bg-aura-accent hover:bg-aura-accentHover shadow-warm-accent transition-all duration-200"
+                      disabled={isSubmitting}
+                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full text-base font-semibold text-white bg-aura-accent hover:bg-aura-accentHover shadow-warm-accent transition-all duration-200 disabled:opacity-50"
                     >
-                      <span>Send Inquiry</span>
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="22" y1="2" x2="11" y2="13" />
-                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                      </svg>
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                          </svg>
+                          <span>Saving to Database...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Send Inquiry &amp; Save</span>
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                          </svg>
+                        </>
+                      )}
                     </button>
                     <p className="mt-2 text-center text-[11px] text-aura-muted">
-                      Your message goes directly to me. No spam, no mailing lists.
+                      Your message goes directly to the studio and is recorded in PostgreSQL.
                     </p>
                   </div>
                 </form>
