@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { useToast } from './ToastContext';
 
 const AuthContext = createContext(null);
 
 const STORAGE_TOKEN_KEY = 'aura_auth_token';
 
 export function AuthProvider({ children }) {
+  const { showSuccess, showInfo } = useToast();
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_TOKEN_KEY));
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,10 @@ export function AuthProvider({ children }) {
       setToken(res.token);
       setUser(res.user);
       setAuthModalOpen(false);
+      showSuccess(
+        'Connected Successfully',
+        `Welcome back, ${res.user.name || 'Collector'}! You are now logged in.`
+      );
       return res.user;
     }
   };
@@ -65,15 +71,24 @@ export function AuthProvider({ children }) {
       setToken(res.token);
       setUser(res.user);
       setAuthModalOpen(false);
+      showSuccess(
+        'Welcome to AURA!',
+        `Account created successfully. Welcome, ${res.user.name}!`
+      );
       return res.user;
     }
   };
 
   // Logout handler
   const logout = () => {
+    const previousName = user?.name;
     localStorage.removeItem(STORAGE_TOKEN_KEY);
     setToken(null);
     setUser(null);
+    showInfo(
+      'Disconnected',
+      previousName ? `Goodbye, ${previousName}. You have been signed out.` : 'You have been signed out.'
+    );
   };
 
   const openAuthModal = (mode = 'signin') => {

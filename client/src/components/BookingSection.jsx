@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
 export default function BookingSection({ printOrders = {}, items = [] }) {
   const { user, token } = useAuth();
+  const { showSuccess, showError } = useToast();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -76,9 +78,15 @@ export default function BookingSection({ printOrders = {}, items = [] }) {
 
       await api.submitOrder(orderData, token);
       setIsSubmitted(true);
+      showSuccess(
+        'Inquiry Submitted',
+        'Thank you! Your vision has been received. I will reply personally within 24 hours.'
+      );
     } catch (err) {
       console.error('Failed to submit booking inquiry to API:', err);
-      setSubmitError(err.message || 'Could not record inquiry. Please try again.');
+      const errMsg = err.message || 'Could not record inquiry. Please try again.';
+      setSubmitError(errMsg);
+      showError('Submission Failed', errMsg);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
 const IMAGE_PRESETS = [
@@ -15,6 +16,7 @@ const IMAGE_PRESETS = [
 
 export default function AddArtworkModal({ isOpen, onClose, onArtworkCreated }) {
   const { token } = useAuth();
+  const { showSuccess, showError } = useToast();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -92,10 +94,13 @@ export default function AddArtworkModal({ isOpen, onClose, onArtworkCreated }) {
       if (onArtworkCreated) {
         onArtworkCreated(newArtwork);
       }
+      showSuccess('Artwork Added', `"${payload.title}" has been published to the gallery.`);
       onClose();
     } catch (err) {
       console.error('Error creating artwork:', err);
-      setError(err.message || 'Failed to save artwork to database.');
+      const errMsg = err.message || 'Failed to save artwork to database.';
+      setError(errMsg);
+      showError('Failed to Add Artwork', errMsg);
     } finally {
       setSubmitting(false);
     }

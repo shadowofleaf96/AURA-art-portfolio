@@ -59,6 +59,7 @@ export default function Header() {
                   </div>
                   <button
                     type="button"
+                    id="header-signout-btn"
                     onClick={logout}
                     className="text-xs font-semibold px-3 py-1.5 rounded-full text-aura-secondary hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
                   >
@@ -68,6 +69,7 @@ export default function Header() {
               ) : (
                 <button
                   type="button"
+                  id="header-signin-btn"
                   onClick={() => openAuthModal('signin')}
                   className="text-sm font-semibold text-aura-primary hover:text-aura-accent px-3 py-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-aura-accent/40 rounded-lg"
                 >

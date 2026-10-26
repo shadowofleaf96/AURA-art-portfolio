@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function AuthModal() {
   const { authModalOpen, authModalMode, setAuthModalMode, closeAuthModal, login, signup } = useAuth();
+  const { showError } = useToast();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,7 +47,9 @@ export default function AuthModal() {
         await signup(name, email, password);
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed. Please check your credentials.');
+      const errorMsg = err.message || 'Authentication failed. Please check your credentials.';
+      setError(errorMsg);
+      showError(authModalMode === 'signin' ? 'Sign In Failed' : 'Registration Failed', errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -75,6 +79,7 @@ export default function AuthModal() {
           </div>
           <button
             type="button"
+            id="auth-close-btn"
             onClick={closeAuthModal}
             className="p-2 rounded-full text-aura-secondary hover:text-aura-primary hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-aura-accent/40"
             aria-label="Close modal"
@@ -89,6 +94,7 @@ export default function AuthModal() {
         <div className="mt-6 flex border-b border-black/10">
           <button
             type="button"
+            id="auth-tab-signin"
             onClick={() => {
               setAuthModalMode('signin');
               setError(null);
@@ -103,6 +109,7 @@ export default function AuthModal() {
           </button>
           <button
             type="button"
+            id="auth-tab-signup"
             onClick={() => {
               setAuthModalMode('signup');
               setError(null);
@@ -128,10 +135,11 @@ export default function AuthModal() {
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           {authModalMode === 'signup' && (
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-aura-secondary mb-1">
+              <label htmlFor="auth-input-name" className="block text-xs font-semibold uppercase tracking-wider text-aura-secondary mb-1">
                 Full Name
               </label>
               <input
+                id="auth-input-name"
                 type="text"
                 required
                 value={name}
@@ -143,10 +151,11 @@ export default function AuthModal() {
           )}
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-aura-secondary mb-1">
+            <label htmlFor="auth-input-email" className="block text-xs font-semibold uppercase tracking-wider text-aura-secondary mb-1">
               Email Address
             </label>
             <input
+              id="auth-input-email"
               type="email"
               required
               value={email}
@@ -157,10 +166,11 @@ export default function AuthModal() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-aura-secondary mb-1">
+            <label htmlFor="auth-input-password" className="block text-xs font-semibold uppercase tracking-wider text-aura-secondary mb-1">
               Password
             </label>
             <input
+              id="auth-input-password"
               type="password"
               required
               minLength={6}
@@ -176,6 +186,7 @@ export default function AuthModal() {
 
           <button
             type="submit"
+            id="auth-submit-btn"
             disabled={submitting}
             className="w-full mt-2 py-3 px-4 rounded-full bg-aura-primary text-white text-sm font-semibold hover:bg-aura-accent transition-colors shadow-warm-sm hover:shadow-warm-md flex items-center justify-center disabled:opacity-50"
           >
