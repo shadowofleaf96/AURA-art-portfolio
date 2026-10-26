@@ -51,11 +51,11 @@
 @keyframes toastEnter {
   from {
     opacity: 0;
-    transform: translateY(-16px) scale(0.94);
+    transform: translate3d(16px, 16px, 0) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 

@@ -145,14 +145,14 @@ function ToastItem({ toast, onDismiss }) {
   );
 }
 
-// Fixed Toast Container
+// Fixed Toast Container (positioned in bottom-right)
 function ToastContainer({ toasts, onDismiss }) {
   if (typeof document === 'undefined' || toasts.length === 0) return null;
 
   return createPortal(
     <div
       id="toast-container"
-      className="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none w-[calc(100vw-2.5rem)] max-w-sm sm:w-96"
+      className="fixed bottom-5 right-5 z-[9999] flex flex-col-reverse gap-3 pointer-events-none w-[calc(100vw-2.5rem)] max-w-sm sm:w-96"
       aria-live="polite"
       aria-label="Notifications"
     >
