@@ -6,7 +6,6 @@
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 5rem;
-    overflow-x: hidden;
     background-color: #faf7f2;
     color: #2c2420;
     -webkit-text-size-adjust: 100%;
@@ -17,12 +16,13 @@
     background-color: #faf7f2;
     color: #2c2420;
     min-height: 100vh;
-    overflow-x: hidden;
+    overflow-x: clip;
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
 
   ::selection {
     background-color: #c47150;

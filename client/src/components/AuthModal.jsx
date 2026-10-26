@@ -51,13 +51,6 @@ export default function AuthModal() {
     }
   };
 
-  const handleFillDemo = () => {
-    setAuthModalMode('signin');
-    setEmail('demo@auragallery.com');
-    setPassword('password123');
-    setError(null);
-  };
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
@@ -201,19 +194,8 @@ export default function AuthModal() {
             )}
           </button>
         </form>
-
-        {/* Demo Account Helper */}
-        <div className="mt-6 pt-5 border-t border-black/10 text-center">
-          <p className="text-xs text-aura-secondary">Testing for assessment?</p>
-          <button
-            type="button"
-            onClick={handleFillDemo}
-            className="mt-1 text-xs font-semibold text-aura-accent hover:underline focus:outline-none"
-          >
-            Click here to auto-fill Demo Account (demo@auragallery.com)
-          </button>
-        </div>
       </div>
     </div>
   );
 }
+

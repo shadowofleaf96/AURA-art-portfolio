@@ -28,7 +28,7 @@ export default function Hero() {
 
         {/* Hero Subtitle */}
         <p className="mt-6 text-base sm:text-lg lg:text-xl text-aura-secondary max-w-2xl mx-auto leading-relaxed font-sans">
-          I’m Mohammed — a photographer and visual storyteller based between Berlin and Paris.
+          I’m Mohammed — a photographer and visual storyteller based between Berlin, Paris and Casablanca .
           I capture honest moments, quiet spaces, and the kind of light that makes you stop and look twice.
         </p>
 

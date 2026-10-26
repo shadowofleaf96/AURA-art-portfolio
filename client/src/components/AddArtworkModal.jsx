@@ -52,25 +52,8 @@ export default function AddArtworkModal({ isOpen, onClose, onArtworkCreated }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFillSample = () => {
-    setFormData({
-      title: 'Monolithic Silence VII',
-      category: 'Architecture',
-      price: 490,
-      edition: 'Numbered Edition of 8',
-      location: 'Ando Pavilion, Naoshima',
-      camera: 'Leica SL2-S • 28mm Elmarit',
-      featured: 'wide',
-      image: '/assets/images/architecture-minimal.jpg',
-      customImage: '',
-      specs: 'Leica Monochrom, 28mm, f/8, 1/500s, ISO 50',
-      description: 'A study of reinforced smooth-poured concrete interacting with early morning diagonal shadows across the Seto Inland Sea.',
-    });
-    setUseCustomUrl(false);
-    setError(null);
-  };
-
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     if (!formData.title.trim()) {
       setError('Please provide a title for the artwork.');
@@ -165,20 +148,9 @@ export default function AddArtworkModal({ isOpen, onClose, onArtworkCreated }) {
             </div>
           )}
 
-          {/* Quick Demo Helper */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-aura-base border border-black/5 text-xs">
-            <span className="text-aura-secondary">Want to test adding quickly?</span>
-            <button
-              type="button"
-              onClick={handleFillSample}
-              className="font-semibold text-aura-accent hover:underline focus:outline-none"
-            >
-              Fill Sample Artwork Data
-            </button>
-          </div>
-
           {/* Title & Category */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-aura-secondary mb-1">
                 Artwork Title <span className="text-aura-accent">*</span>
