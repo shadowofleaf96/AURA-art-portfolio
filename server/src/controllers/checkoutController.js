@@ -115,7 +115,7 @@ export async function createCheckoutSession(req, res) {
         },
       },
       line_items: lineItems,
-      success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
+      success_url: `${clientUrl}/?session_id={CHECKOUT_SESSION_ID}&order_id=${order.id}`,
       cancel_url: `${clientUrl}/?canceled=true`,
     });
 
