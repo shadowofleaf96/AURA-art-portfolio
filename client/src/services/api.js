@@ -93,13 +93,37 @@ export const api = {
     });
   },
 
-  async getMyOrders(token) {
-    return await request('/orders/my-orders', {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  // Stripe Checkout API (Assignment 4)
+  async createCheckoutSession(checkoutData, token) {
+    if (!token) {
+      throw new Error('Please sign in to proceed to checkout.');
+    }
+    const headers = { Authorization: `Bearer ${token}` };
+    return await request('/checkout/create-session', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(checkoutData),
     });
+  },
+
+  async getOrder(orderId, sessionId = null, token = null) {
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const query = sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : '';
+    return await request(`/checkout/order/${orderId || 'lookup'}${query}`, {
+      method: 'GET',
+      headers,
+    });
+  },
+
+  // Get logged-in user's order history
+  async getMyOrders(token) {
+    if (!token) throw new Error('Please sign in to view your orders.');
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await request('/orders/my-orders', {
+      method: 'GET',
+      headers,
+    });
+    return res.data || [];
   },
 };
 

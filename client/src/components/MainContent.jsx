@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 import { CATEGORIES } from '../data/items';
 import GalleryItem from './GalleryItem';
@@ -10,13 +11,15 @@ import ServicesSection from './ServicesSection';
 import BookingSection from './BookingSection';
 
 export default function MainContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token, openAuthModal } = useAuth();
+  const { showSuccess, showError, showInfo } = useToast();
 
   // Live items fetched from Express + PostgreSQL API
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // State for category filtering (Core requirement: real filter built with useState)
   const [activeCategory, setActiveCategory] = useState('All Works');
@@ -73,6 +76,51 @@ export default function MainContent() {
     const qty = printOrders[item.id] || 0;
     return sum + qty * item.price;
   }, 0);
+
+  // Step 3 & 4 & 6: Trigger Stripe Checkout Session (Blocked if not signed in)
+  const handleCheckout = async (customItems = null) => {
+    // Step 3: Block checkout for anyone who isn't signed in
+    if (!isAuthenticated) {
+      showInfo(
+        'Sign In Required',
+        'Please sign in or create a collector account to proceed to checkout.'
+      );
+      openAuthModal('signin');
+      return;
+    }
+
+    // Determine cart items (either custom direct purchase or selected print orders)
+    let cart = [];
+    if (customItems && Array.isArray(customItems) && customItems.length > 0) {
+      cart = customItems;
+    } else {
+      cart = Object.entries(printOrders)
+        .filter(([_, qty]) => qty > 0)
+        .map(([id, qty]) => ({ id, quantity: qty }));
+    }
+
+    if (cart.length === 0) {
+      showInfo('Empty Cart', 'Please select at least one fine art print to order.');
+      return;
+    }
+
+    setCheckoutLoading(true);
+    try {
+      showInfo('Connecting to Stripe', 'Initializing secure Stripe checkout session...');
+      const response = await api.createCheckoutSession({ items: cart }, token);
+
+      if (response && response.url) {
+        // Step 6: Send user to Stripe's hosted checkout page
+        window.location.href = response.url;
+      } else {
+        throw new Error('No checkout URL received from server.');
+      }
+    } catch (err) {
+      console.error('Stripe checkout error:', err);
+      showError('Checkout Failed', err.message || 'Could not start Stripe checkout.');
+      setCheckoutLoading(false);
+    }
+  };
 
   return (
     <main className="w-full overflow-hidden">
@@ -149,21 +197,47 @@ export default function MainContent() {
 
           {/* Active Order Summary Banner if user has selected prints via controlled steppers */}
           {totalPrintsCount > 0 && (
-            <div className="mt-6 p-4 rounded-card bg-aura-accent/10 border border-aura-accent/30 flex flex-col sm:flex-row items-center justify-between gap-3 animate-fadeIn">
+            <div className="mt-6 p-4 rounded-card bg-aura-accent/10 border border-aura-accent/30 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fadeIn">
               <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-full bg-aura-accent text-white font-bold flex items-center justify-center text-xs">
+                <span className="w-8 h-8 rounded-full bg-aura-accent text-white font-bold flex items-center justify-center text-xs shrink-0">
                   {totalPrintsCount}
                 </span>
                 <p className="text-xs sm:text-sm text-aura-primary font-medium">
-                  <strong>{totalPrintsCount} {totalPrintsCount === 1 ? 'archival print' : 'archival prints'}</strong> selected across your collection (&euro;{totalPrintsPrice} total).
+                  <strong>{totalPrintsCount} {totalPrintsCount === 1 ? 'archival print' : 'archival prints'}</strong> selected across your collection (&euro;{totalPrintsPrice.toFixed(2)} total).
                 </p>
               </div>
-              <a
-                href="#book"
-                className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold bg-aura-accent text-white hover:bg-aura-accentHover shadow-sm transition-colors"
-              >
-                Inquire &amp; Order &rarr;
-              </a>
+
+              <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto justify-end">
+                {/* Step 6: Buy now with Stripe Checkout */}
+                <button
+                  type="button"
+                  onClick={() => handleCheckout()}
+                  disabled={checkoutLoading}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full text-xs sm:text-sm font-semibold bg-aura-accent text-white hover:bg-aura-accentHover shadow-warm-accent transition-all disabled:opacity-50"
+                >
+                  {checkoutLoading ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      <span>Connecting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Buy Now with Stripe &bull; &euro;{totalPrintsPrice.toFixed(2)}</span>
+                      <span>&rarr;</span>
+                    </>
+                  )}
+                </button>
+
+                <a
+                  href="#book"
+                  className="px-3.5 py-2 rounded-full text-xs font-medium text-aura-secondary hover:text-aura-primary bg-white/70 hover:bg-white border border-black/5 transition-colors"
+                >
+                  Inquire
+                </a>
+              </div>
             </div>
           )}
 
@@ -188,6 +262,8 @@ export default function MainContent() {
                   quantity={printOrders[item.id] || 0}
                   onQuantityChange={(newQty) => handleQuantityChange(item.id, newQty)}
                   onOpenDetails={(itemToView) => setSelectedItem(itemToView)}
+                  onCheckout={(itm, qty) => handleCheckout([{ id: itm.id, quantity: qty }])}
+                  checkoutLoading={checkoutLoading}
                 />
               ))}
             </div>
@@ -215,8 +291,13 @@ export default function MainContent() {
       {/* Services Section */}
       <ServicesSection />
 
-      {/* Booking Section with Real API Order Submission */}
-      <BookingSection printOrders={printOrders} items={items} />
+      {/* Booking Section with Real API Order Submission & Direct Checkout */}
+      <BookingSection
+        printOrders={printOrders}
+        items={items}
+        onCheckout={handleCheckout}
+        checkoutLoading={checkoutLoading}
+      />
 
       {/* Lightbox / Artwork Details Modal */}
       <ArtworkModal
@@ -227,6 +308,8 @@ export default function MainContent() {
             handleQuantityChange(selectedItem.id, newQty);
           }
         }}
+        onCheckout={(itm, qty) => handleCheckout([{ id: itm.id, quantity: qty }])}
+        checkoutLoading={checkoutLoading}
         onClose={() => setSelectedItem(null)}
       />
 

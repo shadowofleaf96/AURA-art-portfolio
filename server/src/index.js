@@ -5,6 +5,8 @@ import authRoutes from "./routes/auth.js";
 import itemsRoutes from "./routes/items.js";
 import servicesRoutes from "./routes/services.js";
 import ordersRoutes from "./routes/orders.js";
+import checkoutRoutes from "./routes/checkout.js";
+import { handleStripeWebhook } from "./controllers/checkoutController.js";
 import pool from "./db.js";
 
 dotenv.config();
@@ -33,13 +35,26 @@ app.use(
   }),
 );
 
-app.use(express.json());
-
-// Request logging in development
+// Request logging in development (logs all requests including webhooks)
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
+
+// Step 5: Stripe Webhook Route (MUST receive raw Buffer to verify cryptographic signature)
+app.post(
+  "/api/checkout/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook,
+);
+app.post(
+  "/api/orders/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook,
+);
+
+// Standard JSON parsing for all application endpoints
+app.use(express.json());
 
 // Health check endpoint (for deployment monitoring on Railway/Render)
 app.get("/api/health", async (req, res) => {
@@ -65,6 +80,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/items", itemsRoutes);
 app.use("/api/services", servicesRoutes);
 app.use("/api/orders", ordersRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 // 404 fallback for undefined routes
 app.use("/api/*", (req, res) => {

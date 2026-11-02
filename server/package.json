@@ -7,7 +7,12 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "seed": "node src/seed.js"
+    "dev:stripe": "node start-dev.js",
+    "start:stripe": "node stripe-listen.js",
+    "stripe": "node stripe-listen.js",
+    "seed": "node src/seed.js",
+    "migrate": "node src/migrate.js",
+    "test:payments": "node test-assignment4.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -15,6 +20,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "stripe": "^23.1.0"
   }
 }

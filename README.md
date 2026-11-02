@@ -1,6 +1,21 @@
 # AURA — Fine Art, Architectural & Editorial Photography Portfolio
 
-A responsive full-stack photography and art portfolio built for visual artist **Mohammed Kotbi**, upgraded for **Assignment 3** with a **Node.js + Express (MVC) backend**, **PostgreSQL database**, **JWT authentication with persistent sessions**, and a componentized **React + Tailwind CSS** frontend.
+A responsive full-stack photography and art portfolio built for visual artist **Mohammed Kotbi**, featuring **Assignment 4: Real payments with Stripe Checkout (test mode)** on top of a **Node.js + Express (MVC) backend**, **PostgreSQL database**, **JWT authentication with persistent sessions**, and a componentized **React + Tailwind CSS** frontend.
+
+---
+
+## Assignment 4: Stripe Checkout & Payments Architecture Checklist
+
+| Assignment 4 Step | Implementation Details | Status |
+| :--- | :--- | :---: |
+| **1. Database Schema (`orders` & `orderItems`)** | `orders` table (one row per purchase, with `stripe_session_id`, `stripe_payment_intent_id`, `status`) and `order_items` table (snapshot item title, quantity, and verified price) with `"orderItems"` SQL view. | ✓ |
+| **2. Stripe Account & Keys in `.env`** | Stripe SDK configured in test mode. Secret keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) loaded securely from `server/.env`. | ✓ |
+| **3. Auth Middleware Checkout Gate** | `authenticateToken` middleware strictly blocks checkout for unauthenticated visitors (`HTTP 401`). Frontend prompts sign-in before checkout. | ✓ |
+| **4. Tamper-Proof Checkout Route** | `POST /api/checkout/create-session` looks up real prices directly from PostgreSQL `ItemModel.findById()`, records the order as `'pending'`, and creates the Stripe Checkout Session. | ✓ |
+| **5. Verified Webhook Route** | `POST /api/checkout/webhook` mounted with `express.raw()` to cryptographically verify Stripe's signature with `stripe.webhooks.constructEvent()`. **The webhook is the only mechanism permitted to mark an order as `paid`.** | ✓ |
+| **6. "Buy Now" Wired to Stripe** | Integrated "Buy Now" buttons in `GalleryItem.jsx`, `ArtworkModal.jsx`, the active order summary banner, and `BookingSection.jsx` that redirect to Stripe's hosted checkout page. | ✓ |
+| **7. Order Lookup & Success Page** | Success page at `/success?session_id=...&order_id=...` that polls `GET /api/checkout/order/:id` with retry logic to display confirmed `PAID` status once the webhook completes. | ✓ |
+| **8. Production & Stripe CLI Ready** | Supports local testing with Stripe CLI forwarding and production webhook endpoints for deployed environments. | ✓ |
 
 ---
 
@@ -264,12 +279,17 @@ Output:
 ```
 
 ### 5. Start Development Servers
-Run both backend and frontend together with a single command:
+Start your backend server:
 ```bash
 npm run dev
+# Starts Express API at http://localhost:5000 (Healthcheck: http://localhost:5000/api/health)
 ```
-- **Backend API:** `http://localhost:5000` (Healthcheck: `http://localhost:5000/api/health`)
-- **Frontend App:** `http://localhost:5173`
+
+In a second terminal, start the React client:
+```bash
+cd client && npm run dev
+# Starts Vite frontend at http://localhost:5173
+```
 
 ---
 
@@ -279,6 +299,86 @@ For quick evaluation during assessment:
 - **Email:** `demo@auragallery.com`
 - **Password:** `password123`
 *(Or click the **"Click here to auto-fill Demo Account"** button inside the Sign In modal).*
+
+---
+
+## Assignment 4: Stripe Checkout & Webhook Guide
+
+### 1. Stripe Setup (Test Mode)
+1. Sign up for a free Stripe account at [stripe.com](https://stripe.com).
+2. Ensure you toggle the switch at the top to **Test Mode**.
+3. Go to **Developers > API Keys** and copy your **Secret Key** (`sk_test_...`).
+4. Add it to `server/.env`:
+   ```bash
+   STRIPE_SECRET_KEY=sk_test_51...
+   ```
+
+### 2. Testing Webhooks Locally with the Stripe CLI
+Stripe sends asynchronous webhooks when payments succeed. To receive them locally on Windows/Mac/Linux:
+
+1. **Install Stripe CLI** (via scoop, choco, brew, or [direct download](https://github.com/stripe/stripe-cli/releases)):
+   ```bash
+   # Windows (Scoop / Chocolatey)
+   scoop install stripe
+   # or
+   choco install stripe-cli
+   ```
+2. **Login to Stripe**:
+   ```bash
+   stripe login
+   ```
+3. **Forward Webhook Events to your local Express server**:
+   In recent versions of Stripe CLI, specify the events or snapshot mode:
+   ```bash
+   stripe listen --forward-to localhost:5000/api/checkout/webhook --events checkout.session.completed
+   ```
+   *(Or forward all snapshot events: `stripe listen --forward-to localhost:5000/api/checkout/webhook --all-snapshot`)*
+4. Copy the webhook signing secret displayed by the CLI (starts with `whsec_...`) into your `server/.env`:
+   ```bash
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+5. In your app, click **"Buy Now"**, log in with the demo account, and enter Stripe's official test card:
+   - **Card Number:** `4242 4242 4242 4242`
+   - **Expiration:** Any future date (e.g. `12/30`)
+   - **CVC:** Any 3 digits (e.g. `123`)
+   - **Postal Code:** Any valid ZIP/postal code (e.g. `10115` or `90210`)
+6. Complete payment. Stripe will redirect you to the **Success Page** (`/success?session_id=...&order_id=...`), the webhook will fire in your CLI terminal, and the order will automatically display as **PAID** with a green badge and receipt breakdown.
+
+### 3. Automated Payments Test Suite
+Run the automated verification suite to test PostgreSQL schema, price tamper-proofing, transaction insertions, webhook marking as paid, and order receipts:
+```bash
+cd server
+npm run test:payments
+```
+
+---
+
+## Oral Assessment Explanation Guide: Farshid's Questions
+
+Prepare for these exact assessment questions:
+
+### Q1: "Walk me through how your checkout flow is wired up."
+> *"When a user selects an artwork print and clicks 'Buy Now', the frontend first checks if the user is authenticated via our `AuthContext`. If not, checkout is strictly blocked and they are prompted to sign in.*
+> *Once authenticated, the frontend calls `POST /api/checkout/create-session` sending only the artwork ID and quantity.*
+> *Our backend `createCheckoutSession` controller receives the request, verifies the JWT token via `authenticateToken` middleware to extract the real user ID, and queries PostgreSQL `ItemModel.findById` to fetch the authentic database price — never trusting any price sent from the browser.*
+> *The controller creates an initial order record in `orders` with status `'pending'` and line items in `order_items` inside a database transaction.*
+> *It then starts a Stripe Checkout Session with `stripe.checkout.sessions.create()`, stores the returned `stripe_session_id` in the order, and returns the session URL to the browser, which redirects the user to Stripe's hosted payment page."*
+
+### Q2: "How does your webhook work, and why is it the ONLY thing that marks an order as paid?"
+> *"We mount `POST /api/checkout/webhook` before `express.json()` using `express.raw({ type: 'application/json' })` so that we have the raw binary request buffer.*
+> *We verify Stripe's cryptographic signature using `stripe.webhooks.constructEvent(req.body, sig, webhookSecret)`. This guarantees the request genuinely originated from Stripe and hasn't been intercepted or forged.*
+> *When we receive the `checkout.session.completed` event, we extract `session.metadata.order_id` and call `OrderModel.markAsPaid()`, which executes an SQL update: `UPDATE orders SET status = 'paid', stripe_payment_intent_id = ... WHERE id = ...`.*
+> *The webhook is the only place allowed to update status to 'paid' because redirect URLs can be manipulated by malicious users simply visiting `/success` directly without actually completing payment. The webhook is the authoritative source of truth."*
+
+### Q3: "Why can the success page land on 'pending' first, and how does your code handle it?"
+> *"Because Stripe redirects the user's browser immediately upon payment completion, the redirect can reach our frontend a fraction of a second before the asynchronous webhook HTTP request finishes processing on our server.*
+> *To handle this real-world race condition, our `<OrderSuccess />` component calls `GET /api/checkout/order/:id` and polls the database status every 1.5 seconds (up to 8 attempts) until the webhook updates the status to 'paid'. Once 'paid', the status badge turns emerald green and displays the final receipt."*
+
+### Q4: "Show me your orders and order_items tables in PostgreSQL."
+> *"We separated purchases into two relational tables:*
+> 1. `orders`: *stores one row per purchase with `id`, `user_id` (foreign key to `users.id`), `customer_name`, `customer_email`, `total_price`, `currency`, `status` ('pending' / 'paid'), `stripe_session_id`, and `stripe_payment_intent_id`.*
+> 2. `order_items`: *stores individual items purchased with `order_id` (foreign key to `orders.id`), `item_id` (foreign key to `items.id`), `title`, snapshot `price` at the moment of acquisition, and `quantity`.*
+> *We also defined a SQL view `\"orderItems\"` matching the assignment naming."*
 
 ---
 

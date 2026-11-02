@@ -4,17 +4,16 @@
   "private": true,
   "description": "Fullstack Photography & Fine Art Portfolio (React + Tailwind + Node/Express + PostgreSQL MVC)",
   "scripts": {
-    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "cd server && npm run dev",
+    "dev:stripe": "cd server && npm run dev:stripe",
     "start": "cd server && npm start",
     "start:server": "cd server && npm start",
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "build": "cd client && npm run build",
+    "start:stripe": "cd server && npm run start:stripe",
+    "stripe": "cd server && npm run stripe",
     "seed": "cd server && npm run seed",
+    "migrate": "cd server && npm run migrate",
+    "test:payments": "cd server && npm run test:payments",
+    "build": "cd client && npm run build",
     "install:all": "cd server && npm install && cd ../client && npm install"
-
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2"
   }
 }

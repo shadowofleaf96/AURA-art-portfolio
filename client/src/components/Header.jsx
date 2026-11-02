@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, isAuthenticated, logout, openAuthModal } = useAuth();
+  const { user, isAuthenticated, logout, openAuthModal, openOrdersModal } = useAuth();
 
   const navLinks = [
     { name: 'Gallery', href: '#gallery' },
@@ -51,12 +51,25 @@ export default function Header() {
             <div className="flex items-center gap-3 pl-4 border-l border-black/10">
               {isAuthenticated ? (
                 <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={openOrdersModal}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-aura-primary hover:text-aura-accent bg-black/5 hover:bg-black/10 border border-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-aura-accent/40"
+                    title="View your orders and receipts"
+                  >
+                    <svg className="w-3.5 h-3.5 text-aura-accent" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+                    </svg>
+                    <span>My Orders</span>
+                  </button>
+
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/5 border border-black/5 text-xs font-medium text-aura-primary">
                     <span className="w-6 h-6 rounded-full bg-aura-accent text-white flex items-center justify-center font-bold text-[10px] uppercase">
                       {user.name ? user.name[0] : 'U'}
                     </span>
                     <span className="truncate max-w-[130px] font-semibold">{user.name}</span>
                   </div>
+
                   <button
                     type="button"
                     id="header-signout-btn"
@@ -133,24 +146,40 @@ export default function Header() {
             {/* Mobile Auth Status */}
             <div className="pt-3 border-t border-black/5 space-y-2">
               {isAuthenticated ? (
-                <div className="p-3 bg-black/5 rounded-xl flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-full bg-aura-accent text-white flex items-center justify-center font-bold text-xs uppercase">
-                      {user.name ? user.name[0] : 'U'}
-                    </span>
-                    <span className="text-sm font-semibold text-aura-primary truncate max-w-[150px]">
-                      {user.name}
-                    </span>
+                <div className="space-y-2">
+                  <div className="p-3 bg-black/5 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-7 h-7 rounded-full bg-aura-accent text-white flex items-center justify-center font-bold text-xs uppercase">
+                        {user.name ? user.name[0] : 'U'}
+                      </span>
+                      <span className="text-sm font-semibold text-aura-primary truncate max-w-[150px]">
+                        {user.name}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="text-xs font-semibold px-3 py-1.5 rounded-full text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                    >
+                      Sign Out
+                    </button>
                   </div>
+
                   <button
                     type="button"
                     onClick={() => {
-                      logout();
+                      openOrdersModal();
                       setMobileMenuOpen(false);
                     }}
-                    className="text-xs font-semibold px-3 py-1.5 rounded-full text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold text-aura-primary bg-black/5 hover:bg-black/10 transition-colors"
                   >
-                    Sign Out
+                    <svg className="w-4 h-4 text-aura-accent" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+                    </svg>
+                    <span>View My Orders &amp; Receipts</span>
                   </button>
                 </div>
               ) : (

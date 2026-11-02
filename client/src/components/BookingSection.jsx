@@ -3,7 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
 
-export default function BookingSection({ printOrders = {}, items = [] }) {
+export default function BookingSection({
+  printOrders = {},
+  items = [],
+  onCheckout,
+  checkoutLoading = false,
+}) {
   const { user, token } = useAuth();
   const { showSuccess, showError } = useToast();
 
@@ -414,8 +419,28 @@ export default function BookingSection({ printOrders = {}, items = [] }) {
                       </ul>
                       <div className="mt-2 pt-2 border-t border-aura-accent/20 flex justify-between font-bold text-aura-primary">
                         <span>Total Prints Cost:</span>
-                        <span>&euro;{printsTotal}</span>
+                        <span>&euro;{printsTotal.toFixed(2)}</span>
                       </div>
+
+                      {onCheckout && (
+                        <div className="mt-3 pt-2 border-t border-aura-accent/20">
+                          <button
+                            type="button"
+                            onClick={() => onCheckout(orderedPrintsList)}
+                            disabled={checkoutLoading}
+                            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-semibold text-white bg-aura-accent hover:bg-aura-accentHover shadow-sm transition-all disabled:opacity-50"
+                          >
+                            {checkoutLoading ? (
+                              <span>Connecting to Stripe...</span>
+                            ) : (
+                              <span>⚡ Instant Purchase via Stripe (&euro;{printsTotal.toFixed(2)}) &rarr;</span>
+                            )}
+                          </button>
+                          <p className="mt-1 text-center text-[10px] text-aura-muted">
+                            Skip the inquiry form &bull; Pay securely with card on Stripe Checkout
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
 

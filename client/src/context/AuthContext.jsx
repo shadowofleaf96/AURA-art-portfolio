@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('signin'); // 'signin' | 'signup'
+  const [ordersModalOpen, setOrdersModalOpen] = useState(false);
 
   // Restore session on initial load or page refresh
   useEffect(() => {
@@ -100,6 +101,18 @@ export function AuthProvider({ children }) {
     setAuthModalOpen(false);
   };
 
+  const openOrdersModal = () => {
+    if (!token) {
+      openAuthModal('signin');
+      return;
+    }
+    setOrdersModalOpen(true);
+  };
+
+  const closeOrdersModal = () => {
+    setOrdersModalOpen(false);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -115,6 +128,9 @@ export function AuthProvider({ children }) {
         setAuthModalMode,
         openAuthModal,
         closeAuthModal,
+        ordersModalOpen,
+        openOrdersModal,
+        closeOrdersModal,
       }}
     >
       {children}

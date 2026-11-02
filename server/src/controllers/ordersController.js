@@ -46,3 +46,36 @@ export async function getUserOrders(req, res) {
     return res.status(500).json({ error: 'Failed to retrieve your orders.' });
   }
 }
+
+// Controller: Get single order by ID (GET /api/orders/:id)
+export async function getOrderById(req, res) {
+  try {
+    const { id } = req.params;
+    const { session_id: sessionId } = req.query;
+
+    let order;
+    if (sessionId) {
+      order = await OrderModel.findBySessionId(sessionId);
+    }
+    if (!order && id) {
+      order = await OrderModel.findById(id);
+    }
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+
+    // Security check: verify authenticated user owns this order
+    if (req.user && order.userId && order.userId !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied. You do not have permission to view this order.' });
+    }
+
+    return res.json({
+      success: true,
+      order,
+    });
+  } catch (err) {
+    console.error('OrdersController.getOrderById error:', err);
+    return res.status(500).json({ error: 'Failed to retrieve order details.' });
+  }
+}

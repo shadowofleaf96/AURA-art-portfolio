@@ -5,6 +5,8 @@ export default function GalleryItem({
   quantity = 0,
   onQuantityChange,
   onOpenDetails,
+  onCheckout,
+  checkoutLoading = false,
 }) {
   const isWide = item.featured === 'wide';
   const hasOrder = quantity > 0;
@@ -98,10 +100,18 @@ export default function GalleryItem({
           </div>
 
           {hasOrder ? (
-            <div className="text-right">
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-aura-accentLight text-aura-accent">
-                &euro;{quantity * item.price} total
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-aura-accentLight text-aura-accent">
+                &euro;{quantity * item.price}
               </span>
+              <button
+                type="button"
+                onClick={() => onCheckout && onCheckout(item, quantity)}
+                disabled={checkoutLoading}
+                className="px-3 py-1 rounded-full text-xs font-semibold bg-aura-accent hover:bg-aura-accentHover text-white shadow-xs transition-colors disabled:opacity-50"
+              >
+                Buy Now &rarr;
+              </button>
             </div>
           ) : (
             <button
