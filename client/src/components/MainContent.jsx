@@ -11,7 +11,7 @@ import ServicesSection from './ServicesSection';
 import BookingSection from './BookingSection';
 
 export default function MainContent() {
-  const { isAuthenticated, token, openAuthModal } = useAuth();
+  const { isAuthenticated, token, loading: authLoading, openAuthModal } = useAuth();
   const { showSuccess, showError, showInfo } = useToast();
 
   // Live items fetched from Express + PostgreSQL API
@@ -79,6 +79,12 @@ export default function MainContent() {
 
   // Step 3 & 4 & 6: Trigger Stripe Checkout Session (Blocked if not signed in)
   const handleCheckout = async (customItems = null) => {
+    // If authentication is still being restored on page load, wait
+    if (authLoading) {
+      showInfo('Authenticating', 'Restoring your collector session, please try again in a moment...');
+      return;
+    }
+
     // Step 3: Block checkout for anyone who isn't signed in
     if (!isAuthenticated) {
       showInfo(

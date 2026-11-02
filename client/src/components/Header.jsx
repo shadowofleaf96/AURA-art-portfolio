@@ -6,7 +6,7 @@ export default function Header() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const { user, isAuthenticated, logout, openAuthModal, openOrdersModal } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, logout, openAuthModal, openOrdersModal } = useAuth();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -145,6 +145,8 @@ export default function Header() {
                     </div>
                   )}
                 </div>
+              ) : authLoading ? (
+                <div className="w-16 h-8 rounded-full bg-black/5 animate-pulse" />
               ) : (
                 <button
                   type="button"
@@ -248,6 +250,8 @@ export default function Header() {
                     <span>View My Orders &amp; Receipts</span>
                   </button>
                 </div>
+              ) : authLoading ? (
+                <div className="w-full h-10 rounded-full bg-black/5 animate-pulse" />
               ) : (
                 <button
                   type="button"

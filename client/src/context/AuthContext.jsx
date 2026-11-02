@@ -5,12 +5,33 @@ import { useToast } from './ToastContext';
 const AuthContext = createContext(null);
 
 const STORAGE_TOKEN_KEY = 'aura_auth_token';
+const STORAGE_USER_KEY = 'aura_auth_user';
 
 export function AuthProvider({ children }) {
   const { showSuccess, showInfo } = useToast();
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem(STORAGE_TOKEN_KEY));
-  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  });
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_USER_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      // If a token exists in storage, we verify it asynchronously on mount
+      return !!localStorage.getItem(STORAGE_TOKEN_KEY);
+    } catch {
+      return false;
+    }
+  });
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('signin'); // 'signin' | 'signup'
   const [ordersModalOpen, setOrdersModalOpen] = useState(false);
@@ -28,16 +49,19 @@ export function AuthProvider({ children }) {
         const response = await api.getMe(storedToken);
         if (response && response.user) {
           setUser(response.user);
+          localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(response.user));
           setToken(storedToken);
         } else {
           // Token invalid, clear storage
           localStorage.removeItem(STORAGE_TOKEN_KEY);
+          localStorage.removeItem(STORAGE_USER_KEY);
           setToken(null);
           setUser(null);
         }
       } catch (err) {
         console.warn('Session restoration failed or expired:', err.message);
         localStorage.removeItem(STORAGE_TOKEN_KEY);
+        localStorage.removeItem(STORAGE_USER_KEY);
         setToken(null);
         setUser(null);
       } finally {
@@ -53,6 +77,7 @@ export function AuthProvider({ children }) {
     const res = await api.login({ email, password });
     if (res.token && res.user) {
       localStorage.setItem(STORAGE_TOKEN_KEY, res.token);
+      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(res.user));
       setToken(res.token);
       setUser(res.user);
       setAuthModalOpen(false);
@@ -69,6 +94,7 @@ export function AuthProvider({ children }) {
     const res = await api.signup({ name, email, password });
     if (res.token && res.user) {
       localStorage.setItem(STORAGE_TOKEN_KEY, res.token);
+      localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(res.user));
       setToken(res.token);
       setUser(res.user);
       setAuthModalOpen(false);
@@ -84,6 +110,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     const previousName = user?.name;
     localStorage.removeItem(STORAGE_TOKEN_KEY);
+    localStorage.removeItem(STORAGE_USER_KEY);
     setToken(null);
     setUser(null);
     showInfo(

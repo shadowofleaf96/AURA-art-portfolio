@@ -3,7 +3,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 export default function OrderSuccess({ onBackToGallery }) {
-  const { token, isAuthenticated, openAuthModal, openOrdersModal } = useAuth();
+  const { token, isAuthenticated, loading: authLoading, openAuthModal, openOrdersModal } = useAuth();
 
   const [orderId, setOrderId] = useState(null);
   const [sessionId, setSessionId] = useState(null);
@@ -26,6 +26,7 @@ export default function OrderSuccess({ onBackToGallery }) {
   const fetchOrder = useCallback(
     async (currentPoll = 0) => {
       if (!orderId && !sessionId) return;
+      if (authLoading) return;
 
       try {
         const response = await api.getOrder(orderId, sessionId, token);
@@ -56,15 +57,15 @@ export default function OrderSuccess({ onBackToGallery }) {
         setLoading(false);
       }
     },
-    [orderId, sessionId, token]
+    [orderId, sessionId, token, authLoading]
   );
 
   useEffect(() => {
-    if (orderId || sessionId) {
+    if (!authLoading && (orderId || sessionId)) {
       setLoading(true);
       fetchOrder(0);
     }
-  }, [orderId, sessionId, fetchOrder]);
+  }, [orderId, sessionId, authLoading, fetchOrder]);
 
   const handleManualRefresh = () => {
     setLoading(true);
@@ -81,7 +82,41 @@ export default function OrderSuccess({ onBackToGallery }) {
     }
   };
 
-  // Step 3 requirement: Payments pages walled by login
+  // Step 3 requirement: While verifying authentication session, show loading instead of flashing sign-in prompt
+  if (authLoading) {
+    return (
+      <div className="min-h-[75vh] flex items-center justify-center py-16 px-4">
+        <div className="w-full max-w-md bg-white rounded-3xl border border-black/10 shadow-warm-lg p-10 text-center animate-fadeIn">
+          <div className="w-16 h-16 mx-auto rounded-full bg-aura-accent/10 flex items-center justify-center text-aura-accent mb-4">
+            <svg
+              className="animate-spin h-8 w-8 text-aura-accent"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
+            </svg>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-aura-accent">
+            Collector Verification
+          </span>
+          <h2 className="mt-2 font-serif text-2xl font-bold text-aura-primary">
+            Verifying Authentication...
+          </h2>
+          <p className="mt-2 text-xs text-aura-secondary leading-relaxed">
+            Restoring your secure session and retrieving order confirmation...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 3 requirement: Payments pages walled by login (only after auth check has completed)
   if (!isAuthenticated) {
     return (
       <div className="min-h-[75vh] flex items-center justify-center py-16 px-4">
