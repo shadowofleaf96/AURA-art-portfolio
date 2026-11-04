@@ -174,16 +174,6 @@ export default function MyOrdersModal({ isOpen, onClose }) {
                         <p className="text-[11px] text-aura-muted italic">Inquiry booking</p>
                       )}
                     </div>
-
-                    {/* Stripe References */}
-                    {order.stripeSessionId && (
-                      <div className="pt-2 border-t border-black/5 text-[10px] font-mono text-aura-muted flex flex-wrap justify-between gap-1">
-                        <span>Session: {order.stripeSessionId.slice(0, 24)}...</span>
-                        {order.stripePaymentIntentId && (
-                          <span className="text-emerald-700">Ref: {order.stripePaymentIntentId}</span>
-                        )}
-                      </div>
-                    )}
                   </article>
                 );
               })}

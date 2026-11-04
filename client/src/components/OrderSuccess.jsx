@@ -294,26 +294,6 @@ export default function OrderSuccess({ onBackToGallery }) {
                 <span className="text-aura-accent">&euro;{order.totalPrice.toFixed(2)}</span>
               </div>
             </div>
-
-            {/* Stripe Reference Metadata */}
-            {order.stripeSessionId && (
-              <div className="p-3.5 rounded-xl bg-aura-card border border-black/5 text-[11px] text-aura-secondary space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-aura-muted">Stripe Checkout Session:</span>
-                  <span className="font-mono text-aura-primary truncate max-w-[280px]">
-                    {order.stripeSessionId}
-                  </span>
-                </div>
-                {order.stripePaymentIntentId && (
-                  <div className="flex justify-between">
-                    <span className="text-aura-muted">Payment Intent:</span>
-                    <span className="font-mono text-aura-primary truncate max-w-[280px]">
-                      {order.stripePaymentIntentId}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
 
